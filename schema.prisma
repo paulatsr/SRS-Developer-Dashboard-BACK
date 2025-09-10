@@ -1,0 +1,54 @@
+generator client{
+  provider = "prisma-client-ts"
+  output   = "src/generated"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Project {
+  id                String   @id @default(cuid())
+  name              String
+  description       String?
+  start_date        DateTime
+  end_date          DateTime
+  max_people_front  Int
+  max_people_back   Int
+  technical_file    String?
+  icon              String?
+  budget            Decimal?
+  
+  // Relationship
+  projectAccounts   ProjectAccount[]
+}
+
+model Account {
+  id       String @id @default(cuid())
+  email    String @unique                
+  password String                         
+  role     Role                          
+  
+  // Relationship
+  projectAccounts ProjectAccount[]        
+}
+
+model ProjectAccount {
+  id         String @id @default(cuid())
+  project_id String
+  account_id String
+  role       String
+  
+  // Relations
+  project    Project @relation(fields: [project_id], references: [id])
+  account    Account @relation(fields: [account_id], references: [id])
+  
+  @@unique([project_id, account_id])
+}
+
+enum Role {
+  ADMIN
+  DEVELOPER
+}
