@@ -117,4 +117,69 @@ export class ProjectsController {
     };
     return this.projectsService.uploadProjectFiles(projectId, fileObjects);
   }
+
+  @Post('with-files')
+  @ApiOperation({ summary: 'Create project with file uploads' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        project_name: { type: 'string', example: 'Website Redesign' },
+        customer_name: { type: 'string', example: 'Acme Corporation' },
+        description: { type: 'string', example: 'Complete website redesign' },
+        start_date: {
+          type: 'string',
+          format: 'date-time',
+          example: '2024-01-01T00:00:00Z',
+        },
+        end_date: {
+          type: 'string',
+          format: 'date-time',
+          example: '2024-06-01T00:00:00Z',
+        },
+        max_people_front: { type: 'integer', example: 2 },
+        max_people_back: { type: 'integer', example: 3 },
+        budget: { type: 'number', example: 50000 },
+        technical_file: {
+          type: 'string',
+          format: 'binary',
+          description: 'PDF file for technical specifications',
+        },
+        icon: {
+          type: 'string',
+          format: 'binary',
+          description: 'Image file for project icon',
+        },
+      },
+      required: [
+        'project_name',
+        'customer_name',
+        'start_date',
+        'end_date',
+        'max_people_front',
+        'max_people_back',
+      ],
+    },
+  })
+  @UseInterceptors(
+    FileFieldsInterceptor([
+      { name: 'technical_file', maxCount: 1 },
+      { name: 'icon', maxCount: 1 },
+    ]),
+  )
+  createWithFiles(
+    @Body() createProjectDto: any,
+    @UploadedFiles()
+    files: {
+      technical_file?: Express.Multer.File[];
+      icon?: Express.Multer.File[];
+    },
+  ) {
+    const fileObjects = {
+      technical_file: files?.technical_file?.[0],
+      icon: files?.icon?.[0],
+    };
+    return this.projectsService.createWithFiles(createProjectDto, fileObjects);
+  }
 }

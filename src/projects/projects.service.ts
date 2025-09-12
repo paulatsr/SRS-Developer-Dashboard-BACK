@@ -181,17 +181,19 @@ export class ProjectsService {
 
   // Create project with files
   async createWithFiles(
-    data: CreateProjectDto,
+    data: any, // Using any because multipart data comes as strings
     files: { technical_file?: Express.Multer.File; icon?: Express.Multer.File },
   ) {
     // Transform string values to correct types (multipart/form-data sends everything as strings)
     const transformedData = {
-      ...data,
-      max_people_front: parseInt(data.max_people_front.toString()),
-      max_people_back: parseInt(data.max_people_back.toString()),
-      budget: data.budget ? parseFloat(data.budget.toString()) : undefined,
+      project_name: data.project_name,
+      customer_name: data.customer_name,
+      description: data.description || undefined,
       start_date: new Date(data.start_date),
       end_date: new Date(data.end_date),
+      max_people_front: parseInt(data.max_people_front),
+      max_people_back: parseInt(data.max_people_back),
+      budget: data.budget ? parseFloat(data.budget) : undefined,
     };
 
     // First create the project
